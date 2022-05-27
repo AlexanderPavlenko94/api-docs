@@ -91,7 +91,9 @@ ticker | String | **No** | Currency's ticker. Example: BTC
 
 Available statuses:
 * `Status 200`
-* `Status 400 if request validation failed`
+* `Status 422 if request validation failed`
+* `Status 400 if inner validation failed`
+* `Status 503 if service temporary unavailable`
 
 ```json5
 {
@@ -114,10 +116,39 @@ Available statuses:
 
 ```json5
 {
-    "message": "Currency not found"
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "ticker": [
+            "Ticker field should be a string."
+        ]
+    }
 }
 ```
 
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "ticker": [
+            "Currency was not found."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+```
 </details>
 ___
 
@@ -130,13 +161,13 @@ This endpoint creates limit trading order.
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-market | String | **Yes** | Available market. Example: BTC_USDT
-side | String | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
-amount | String | **Yes** | Amount of stock currency to buy or sell. Example: '0.001'
-price | String | **Yes** | Price in money currency. Example: '9800'
-clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
+Name | Type          | Mandatory | Description
+------------ |---------------| ------------ | ------------
+market | String        | **Yes** | Available market. Example: BTC_USDT
+side | String        | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
+amount | String/Number | **Yes** | Amount of stock currency to buy or sell. Example: '0.001' or 0.001
+price | String/Number        | **Yes** | Price in money currency. Example: '9800' or 9800
+clientOrderId | String        | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
 
 **Request BODY raw:**
 ```json5
@@ -154,7 +185,8 @@ clientOrderId | String | **No** | Identifier should be unique and contain letter
 **Response:**
 Available statuses:
 * `Status 200`
-* `Status 422 if inner validation failed`
+* `Status 400 if inner validation failed`
+* `Status 422 if request validation failed`
 * `Status 503 if service temporary unavailable`
 
 ```json5
@@ -179,29 +211,30 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `30` - default validation error code
+* `31` - market validation failed
+* `32` - amount validation failed
+* `33` - price validation failed
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `35` - incorrect maker fee (it is less than zero or its precision is too big)
+* `36` - clientOrderId validation failed
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount field is required."
+            "Amount field is required."
         ],
         "market": [
-            "The market field is required."
+            "Market field is required."
         ],
         "price": [
-            "The price field is required."
+            "Price field is required."
         ],
         "side": [
-            "The side field is required."
+            "Side field is required."
         ]
     }
 }
@@ -209,11 +242,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "side": [
-            "The selected side is invalid."
+            "Side field should contain only 'buy' or 'sell' values."
         ]
     }
 }
@@ -221,11 +254,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount must be a number."
+            "Amount field should be numeric string or number."
         ]
     }
 }
@@ -233,11 +266,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 33,
     "message": "Validation failed",
     "errors": {
         "price": [
-            "The price must be a number."
+            "Price field should be numeric string or number."
         ]
     }
 }
@@ -245,11 +278,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
-            "Unknown market."
+            "Market is not available."
         ]
     }
 }
@@ -257,23 +290,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Not enough balance"
-        ]
-    }
-}
-```
-
-```json5
-{
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "amount": [
-            "Given amount is less than min amount - 0.001",
+            "Given amount is less than min amount 0.001",
             "Min amount step = 0.000001"
         ]
     }
@@ -283,11 +304,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field should be a string."
+            "ClientOrderId field should be a string."
         ]
     }
 }
@@ -296,11 +317,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field format should be: «0-9a-z»"
+            "ClientOrderId field field should contain only latin letters, numbers and dashes."
         ]
     }
 }
@@ -309,7 +330,7 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
@@ -317,23 +338,18 @@ Error codes:
         ]
     }
 }
-
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
-        "amount": [
-            "Given amount is less than min amount 0.0001"
-        ],
         "total": [
-            "Total is less than 5.05"
+            "Total(amount * price) is less than 5.05"
         ]
     }
 }
-
 ```
 
 ```json5
@@ -347,6 +363,92 @@ Error codes:
     }
 }
 
+```
+
+```json5
+{
+  "code": 33,
+  "message": "Validation failed",
+  "errors": {
+    "price": [
+      "Price field should be at least 10",
+      "Min price step = 0.000001"
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 33,
+  "message": "Validation failed",
+  "errors": {
+    "price": [
+      "Price should be greater than 0."
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 34,
+  "message": "Validation failed",
+  "errors": {
+    "taker_fee": [
+      "Incorrect taker fee"
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 35,
+  "message": "Validation failed",
+  "errors": {
+    "maker_fee": [
+      "Incorrect maker fee"
+    ]
+  }
+}
+```
+
+
+```json5
+{
+    "code": 10,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Not enough balance."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 11,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Amount too small."
+        ]
+    }
+}
 ```
 
 </details>
@@ -366,7 +468,7 @@ Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 market | String | **Yes** | Available market. Example: BTC_USDT
 side | String | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
-amount | String | **Yes** | ⚠️ Amount of money currency to buy or amount in stock currency to sell. Example: '5 USDT' for buy (min total) and '0.001 BTC' for sell (min amount).
+amount | String/Number | **Yes** | ⚠️ Amount of money currency to buy or amount in stock currency to sell. Example: '5 USDT' for buy (min total) and '0.001 BTC' for sell (min amount).
 clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
 
 **Request BODY raw:**
@@ -395,8 +497,9 @@ clientOrderId | String | **No** | Identifier should be unique and contain letter
 **Response:**
 Available statuses:
 * `Status 200`
-* `Status 422 if internal validation failed`
-* `Status 503 if service is temporary unavailable`
+* `Status 400 if inner validation failed`
+* `Status 422 if request validation failed`
+* `Status 503 if service temporary unavailable`
 
 ```json5
 {
@@ -419,26 +522,25 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `30` - default validation error code
+* `31` - market validation failed
+* `32` - amount validation failed
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `36` - clientOrderId validation failed
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount field is required."
+            "Amount field is required."
         ],
         "market": [
-            "The market field is required."
+            "Market field is required."
         ],
         "side": [
-            "The side field is required."
+            "Side field is required."
         ]
     }
 }
@@ -446,23 +548,23 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "side": [
-            "The selected side is invalid."
-        ]
-    }
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "side": [
+      "Side field should contain only 'buy' or 'sell' values."
+    ]
+  }
 }
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount must be a number."
+            "Amount field should be numeric string or number."
         ]
     }
 }
@@ -470,11 +572,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
-            "Unknown market."
+            "Market is not available."
         ]
     }
 }
@@ -482,23 +584,24 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Not enough balance"
+            "Not enough balance."
         ]
     }
 }
+
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Given amount is less than min amount - 0.001",
+            "Given amount is less than min amount 0.001",
             "Min amount step = 0.000001"
         ]
     }
@@ -508,11 +611,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field should be a string."
+            "ClientOrderId field should be a string."
         ]
     }
 }
@@ -521,11 +624,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field format should be: «0-9a-z»"
+            "ClientOrderId field field should contain only latin letters, numbers and dashes."
         ]
     }
 }
@@ -534,11 +637,102 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
             "This client order id is already used by the current account. It will become available in 24 hours (86400 seconds)."
+        ]
+    }
+}
+
+```
+
+```json5
+{
+    "code": 32,
+    "message": "Validation failed",
+    "errors": {
+        "amount": [
+            "Total amount + fee should be no less than"
+        ]
+    }
+}
+
+```
+
+```json5
+{
+  "code": 32,
+  "message": "Validation failed",
+  "errors": {
+    "amount": [
+      "Min total step = = 0.000001"
+    ]
+  }
+}
+
+```
+
+```json5
+{
+  "code": 32,
+  "message": "Validation failed",
+  "errors": {
+    "amount": [
+      "Amount should be greater than 0."
+    ]
+  }
+}
+
+```
+
+```json5
+{
+  "code": 34,
+  "message": "Validation failed",
+  "errors": {
+    "taker_fee": [
+      "Incorrect taker fee"
+    ]
+  }
+}
+
+```
+
+```json5
+{
+    "code": 10,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Not enough balance."
+        ]
+    }
+}
+
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+
+```
+
+```json5
+{
+    "code": 11,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Amount too small."
         ]
     }
 }
@@ -561,7 +755,7 @@ Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 market | String | **Yes** | Available market. Example: BTC_USDT
 side | String | **Yes** | Order type. Available variables: "buy", "sell"
-amount | String | **Yes** | ⚠️ Amount in stock currency for buy or sell. Example: "0.0001".
+amount | String/Number | **Yes** | ⚠️ Amount in stock currency for buy or sell. Example: "0.0001" or 0.0001.
 clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
 
 **Request BODY raw:**
@@ -579,8 +773,9 @@ clientOrderId | String | **No** | Identifier should be unique and contain letter
 **Response:**
 Available statuses:
 * `Status 200`
-* `Status 422 if internal validation failed`
-* `Status 503 if service is temporary unavailable`
+* `Status 400 if inner validation failed`
+* `Status 422 if request validation failed`
+* `Status 503 if service temporary unavailable`
 
 ```json5
 {
@@ -603,26 +798,25 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `30` - default validation error code
+* `31` - market validation failed
+* `32` - amount validation failed
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `36` - clientOrderId validation failed
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount field is required."
+            "Amount field is required."
         ],
         "market": [
-            "The market field is required."
+            "Market field is required."
         ],
         "side": [
-            "The side field is required."
+            "Side field is required."
         ]
     }
 }
@@ -630,23 +824,23 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "side": [
-            "The selected side is invalid."
-        ]
-    }
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "side": [
+      "Side field should contain only 'buy' or 'sell' values."
+    ]
+  }
 }
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount must be a number."
+            "Amount field should be numeric string or number."
         ]
     }
 }
@@ -654,11 +848,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
-            "Unknown market."
+            "Market is not available."
         ]
     }
 }
@@ -666,23 +860,24 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Not enough balance"
+            "Not enough balance."
         ]
     }
 }
+
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Given amount is less than min amount - 0.001",
+            "Given amount is less than min amount 0.001",
             "Min amount step = 0.000001"
         ]
     }
@@ -692,11 +887,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field should be a string."
+            "ClientOrderId field should be a string."
         ]
     }
 }
@@ -705,11 +900,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field format should be: «0-9a-z»"
+            "ClientOrderId field field should contain only latin letters, numbers and dashes."
         ]
     }
 }
@@ -718,7 +913,7 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
@@ -731,13 +926,65 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
+  "code": 32,
+  "message": "Validation failed",
+  "errors": {
+    "amount": [
+      "Amount should be greater than 0."
+    ]
+  }
+}
+
+```
+
+```json5
+{
+  "code": 34,
+  "message": "Validation failed",
+  "errors": {
+    "taker_fee": [
+      "Incorrect taker fee"
+    ]
+  }
+}
+
+```
+
+```json5
+{
+    "code": 10,
+    "message": "Inner validation failed",
     "errors": {
         "amount": [
-            "Min amount step = 0.01"         //money/stock precision is not taken into consideration when order was submitted
+            "Not enough balance."
         ]
     }
+}
+
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+
+```
+
+```json5
+{
+  "code": 11,
+  "message": "Inner validation failed",
+  "errors": {
+    "amount": [
+      "Amount too small."
+    ]
+  }
 }
 
 ```
@@ -758,9 +1005,9 @@ Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 market | String | **Yes** | Available market. Example: BTC_USDT
 side | String | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
-amount | String | **Yes** | Amount of stock currency to buy or sell. Example: '0.001'
-price | String | **Yes** | Price in money currency. Example: '9800'
-activation_price | String | **Yes** | Activation price in money currency. Example: '10000'
+amount | String/Number | **Yes** | Amount of stock currency to buy or sell. Example: '0.001' or 0.001
+price | String/Number | **Yes** | Price in money currency. Example: '9800' or 9800
+activation_price | String/Number | **Yes** | Activation price in money currency. Example: '10000' or 10000
 clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
 
 **Request BODY raw:**
@@ -780,7 +1027,8 @@ clientOrderId | String | **No** | Identifier should be unique and contain letter
 **Response:**
 Available statuses:
 * `Status 200`
-* `Status 422 if inner validation failed`
+* `Status 400 if inner validation failed`
+* `Status 422 if request validation failed`
 * `Status 503 if service temporary unavailable`
 
 ```json5
@@ -806,32 +1054,33 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `30` - default validation error code
+* `31` - market validation failed
+* `32` - amount validation failed
+* `33` - price validation failed
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `35` - incorrect maker fee (it is less than zero or its precision is too big)
+* `36` - clientOrderId validation failed
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "activation_price": [
-            "The activation price field is required."
+            "Activation price field is required."
         ],
         "amount": [
-            "The amount field is required."
+            "Amount field is required."
         ],
         "market": [
-            "The market field is required."
+            "Market field is required."
         ],
         "price": [
-            "The price field is required."
+            "Price field is required."
         ],
         "side": [
-            "The side field is required."
+            "Side field is required."
         ]
     }
 }
@@ -839,23 +1088,23 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "side": [
-            "The selected side is invalid."
-        ]
-    }
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "side": [
+      "Side field should contain only 'buy' or 'sell' values."
+    ]
+  }
 }
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount must be a number."
+            "Amount field should be numeric string or number."
         ]
     }
 }
@@ -863,11 +1112,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 33,
     "message": "Validation failed",
     "errors": {
         "price": [
-            "The price must be a number."
+            "Price field should be numeric string or number."
         ]
     }
 }
@@ -875,7 +1124,156 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
+    "message": "Validation failed",
+    "errors": {
+        "market": [
+            "Market is not available."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 32,
+    "message": "Validation failed",
+    "errors": {
+        "amount": [
+            "Not enough balance."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 32,
+    "message": "Validation failed",
+    "errors": {
+        "amount": [
+            "Given amount is less than min amount 0.001",
+            "Min amount step = 0.000001"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "total": [
+            "Total(amount * price) is less than 5.05"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 36,
+    "message": "Validation failed",
+    "errors": {
+        "clientOrderId": [
+            "ClientOrderId field should be a string."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 36,
+    "message": "Validation failed",
+    "errors": {
+        "clientOrderId": [
+            "ClientOrderId field field should contain only latin letters, numbers and dashes."
+        ]
+    }
+}
+
+```
+
+```json5
+{
+    "code": 36,
+    "message": "Validation failed",
+    "errors": {
+        "clientOrderId": [
+            "This client order id is already used by the current account. It will become available in 24 hours (86400 seconds)."
+        ]
+    }
+}
+
+```
+
+```json5
+{
+  "code": 32,
+  "message": "Validation failed",
+  "errors": {
+    "amount": [
+      "Amount should be greater than 0."
+    ]
+  }
+}
+
+```
+
+```json5
+{
+  "code": 33,
+  "message": "Validation failed",
+  "errors": {
+    "price": [
+      "Price field should be at least 10",
+      "Min price step = 0.000001"
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 33,
+  "message": "Validation failed",
+  "errors": {
+    "price": [
+      "Price should be greater than 0."
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 34,
+  "message": "Validation failed",
+  "errors": {
+    "taker_fee": [
+      "Incorrect taker fee"
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 35,
+  "message": "Validation failed",
+  "errors": {
+    "maker_fee": [
+      "Incorrect maker fee"
+    ]
+  }
+}
+```
+
+```json5
+{
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "activationPrice": [
@@ -887,11 +1285,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "activation_price": [
-            "The activation price must be a number."
+            "Activation price should be numeric string."
         ]
     }
 }
@@ -899,11 +1297,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
-        "market": [
-            "Unknown market."
+        "activationPrice": [
+            "Activation price should be greater than 0."
         ]
     }
 }
@@ -911,11 +1309,71 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Empty history"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Min activation price = 10"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Min activation price step = 0.00001"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Activation price should not be equal to the last price"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "lastPrice": [
+            "internal error"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 10,
+    "message": "Inner validation failed",
     "errors": {
         "amount": [
-            "Not enough balance"
+            "Not enough balance."
         ]
     }
 }
@@ -923,55 +1381,26 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
+    "code": 1,
+    "message": "Inner validation failed",
     "errors": {
         "amount": [
-            "Given amount is less than min amount - 0.001",
-            "Min amount step = 0.000001"
+            "Invalid argument."
         ]
     }
 }
-
 ```
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "clientOrderId": [
-            "The field should be a string."
-        ]
-    }
+  "code": 11,
+  "message": "Inner validation failed",
+  "errors": {
+    "amount": [
+      "Amount too small."
+    ]
+  }
 }
-
-```
-
-```json5
-{
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "clientOrderId": [
-            "The field format should be: «0-9a-z»"
-        ]
-    }
-}
-
-```
-
-```json5
-{
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "clientOrderId": [
-            "This client order id is already used by the current account. It will become available in 24 hours (86400 seconds)."
-        ]
-    }
-}
-
 ```
 
 </details>
@@ -987,13 +1416,13 @@ This endpoint creates stop-market trading order
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-market | String | **Yes** | Available market. Example: BTC_USDT
-side | String | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
-amount | String | **Yes** | ⚠️Amount of **`money`** currency to **buy** or amount in **`stock`** currency to **sell**. Example: '0.01' for buy and '0.0001' for sell.
-activation_price | String | **Yes** | Activation price in money currency. Example: '10000'
-clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
+Name | Type          | Mandatory | Description
+------------ |---------------| ------------ | ------------
+market | String        | **Yes** | Available market. Example: BTC_USDT
+side | String        | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
+amount | String/Number | **Yes** | ⚠️Amount of **`money`** currency to **buy** or amount in **`stock`** currency to **sell**. Example: '0.01' or 0.01 for buy and '0.0001' for sell.
+activation_price | String/Number | **Yes** | Activation price in money currency. Example: '10000' or 10000
+clientOrderId | String        | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
 
 **Request BODY raw:**
 ```json5
@@ -1046,29 +1475,28 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `30` - default validation error code
+* `31` - market validation failed
+* `32` - amount validation failed
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `36` - clientOrderId validation failed
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "activation_price": [
-            "The activation price field is required."
+            "Activation price field is required."
         ],
         "amount": [
-            "The amount field is required."
+            "Amount field is required."
         ],
         "market": [
-            "The market field is required."
+            "Market field is required."
         ],
         "side": [
-            "The side field is required."
+            "Side field is required."
         ]
     }
 }
@@ -1076,23 +1504,23 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "side": [
-            "The selected side is invalid."
-        ]
-    }
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "side": [
+      "Side field should contain only 'buy' or 'sell' values."
+    ]
+  }
 }
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "The amount must be a number."
+            "Amount field should be numeric string or number."
         ]
     }
 }
@@ -1100,11 +1528,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
-            "Unknown market."
+            "Market is not available."
         ]
     }
 }
@@ -1112,36 +1540,38 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Not enough balance"
+            "Not enough balance."
         ]
     }
 }
+
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
-            "Given amount is less than min amount - 0.001",
+            "Given amount is less than min amount 0.001",
             "Min amount step = 0.000001"
         ]
     }
 }
 
 ```
+
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field should be a string."
+            "ClientOrderId field should be a string."
         ]
     }
 }
@@ -1150,11 +1580,11 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
-            "The field format should be: «0-9a-z»"
+            "ClientOrderId field field should contain only latin letters, numbers and dashes."
         ]
     }
 }
@@ -1163,7 +1593,7 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 36,
     "message": "Validation failed",
     "errors": {
         "clientOrderId": [
@@ -1172,6 +1602,164 @@ Error codes:
     }
 }
 
+```
+
+```json5
+{
+  "code": 32,
+  "message": "Validation failed",
+  "errors": {
+    "amount": [
+      "Amount should be greater than 0."
+    ]
+  }
+}
+
+```
+
+```json5
+{
+  "code": 34,
+  "message": "Validation failed",
+  "errors": {
+    "taker_fee": [
+      "Incorrect taker fee"
+    ]
+  }
+}
+
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Activation price should not be equal to the last price"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activation_price": [
+            "Activation price should be numeric string."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Activation price should be greater than 0."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Empty history"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Min activation price = 10"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Min activation price step = 0.00001"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "activationPrice": [
+            "Activation price should not be equal to the last price"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "lastPrice": [
+            "internal error"
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 10,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Not enough balance."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+```
+
+```json5
+{
+  "code": 11,
+  "message": "Inner validation failed",
+  "errors": {
+    "amount": [
+      "Amount too small."
+    ]
+  }
+}
 ```
 
 </details>
@@ -1187,10 +1775,10 @@ Cancel existing order
 
 **Parameters:**
 
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-market | String | **Yes** | Available market. Example: BTC_USDT
-orderId | Int | **Yes** | Order Id. Example: 4180284841
+Name | Type       | Mandatory | Description
+------------ |------------| ------------ | ------------
+market | String     | **Yes** | Available market. Example: BTC_USDT
+orderId | String/Int | **Yes** | Order Id. Example: 4180284841 or "4180284841"
 
 **Request BODY raw:**
 ```json5
@@ -1206,7 +1794,8 @@ orderId | Int | **Yes** | Order Id. Example: 4180284841
 
 Available statuses:
 * `Status 200`
-* `Status 422 if inner validation failed`
+* `Status 400 if inner validation failed`
+* `Status 422 if validation failed`
 * `Status 503 if service temporary unavailable`
 
 
@@ -1233,22 +1822,56 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
+* `30` - default validation error code 
+* `31` - market validation failed
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "market": [
-            "The market field is required."
+            "Market field is required."
         ],
         "orderId": [
-            "The order id field is required."
+            "OrderId field is required."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 31,
+    "message": "Validation failed",
+    "errors": {
+        "market": [
+            "Market is not available."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "orderId": [
+            "OrderId field should be an integer."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "market": [
+            "Market field should be a string.",
+            "Market field format is invalid."
         ]
     }
 }
@@ -1259,7 +1882,7 @@ Error codes:
     "code": 2,
     "message": "Inner validation failed",
     "errors": {
-        "order_id": [
+        "orderId": [
             "Unexecuted order was not found."
         ]
     }
@@ -1268,42 +1891,15 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
-    "message": "Validation failed",
+    "code": 1,
+    "message": "Inner validation failed",
     "errors": {
-        "market": [
-            "Market is not available"
+        "amount": [
+            "Invalid argument."
         ]
     }
 }
 ```
-
-```json5
-{
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "orderId": [
-            "The order id must be an integer."
-        ]
-    }
-}
-```
-
-```json5
-{
-    "code": 0,
-    "message": "Validation failed",
-    "errors": {
-        "market": [
-            "The market must be a string.",
-            "The market format is invalid.",
-            "Market is not available"
-        ]
-    }
-}
-```
-
 </details>
 
 ___
@@ -1335,6 +1931,12 @@ offset | Int | **No** | If you want the request to return entries starting from 
 ```
 
 **Response:**
+
+Available statuses:
+* `Status 200`
+* `Status 422 if request validation failed`
+* `Status 400 if inner validation failed`
+* `Status 503 if service temporary unavailable`
 ```json5
 [
     {
@@ -1371,6 +1973,31 @@ offset | Int | **No** | If you want the request to return entries starting from 
     }
 }
 ```
+
+```json5
+{
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should be a string."
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field format is invalid."
+    ]
+  }
+}
+```
+
 
 ```json5
 {
@@ -1429,6 +2056,18 @@ offset | Int | **No** | If you want the request to return entries starting from 
 }
 ```
 
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+```
+
 </details>
 
 ___
@@ -1459,6 +2098,12 @@ offset | Int | **No** | If you want the request to return entries starting from 
 ```
 
 **Response:**
+
+Available statuses:
+* `Status 200`
+* `Status 422 if request validation failed`
+* `Status 400 if inner validation failed`
+* `Status 503 if service temporary unavailable`
 ```json5
 {
     "BTC_USDT": [
@@ -1485,14 +2130,14 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
-            "The limit may not be greater than 100."
+            "Limit field should be an integer."
         ],
         "offset": [
-            "The offset may not be greater than 10000."
+            "Offset field should be an integer."
         ]
     }
 }
@@ -1500,14 +2145,65 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 ```json5
 {
-    "code": 0,
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field format is invalid."
+    ]
+  }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "market": [
+            "Market field should be a string."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
-            "The limit must be at least 1."
+            "Limit should not be greater than 100."
         ],
         "offset": [
-            "The offset must be at least 0."
+            "Offset should not be greater than 10000."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "limit": [
+            "Limit should be at least 1."
+        ],
+        "offset": [
+            "Offset should be at least 0."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
         ]
     }
 }
@@ -1545,6 +2241,12 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 **Response:**
 
+Available statuses:
+* `Status 200`
+* `Status 422 if request validation failed`
+* `Status 400 if inner validation failed`
+* `Status 503 if service temporary unavailable`
+
 ```json5
 {
     "records": [
@@ -1571,26 +2273,23 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 ```json5
 {
-    "response": null,
-    "status": 422,
-    "errors": {
-        "orderId": [
-            "Finished order id not found on your account"
-        ]
-    },
-    "notification": null,
-    "warning": "Finished order id not found on your account",
-    "_token": null
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "orderId": [
+      "Order was not found."
+    ]
+  }
 }
 ```
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "orderId": [
-            "The order id field is required."
+            "OrderId field is required."
         ]
     }
 }
@@ -1598,11 +2297,11 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "orderId": [
-            "The order id must be an integer."
+            "OrderId field should be an integer."
         ]
     }
 }
@@ -1610,14 +2309,14 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
-            "The limit may not be greater than 100."
+            "Limit should not be greater than 100."
         ],
         "offset": [
-            "The offset may not be greater than 100000."
+            "Offset should not be greater than 10000."
         ]
     }
 }
@@ -1625,14 +2324,38 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
-            "The limit must be at least 1."
+            "Limit should be at least 1."
         ],
         "offset": [
-            "The offset must be at least 0."
+            "Offset should be at least 0."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
         ]
     }
 }
@@ -1670,6 +2393,12 @@ offset | Int | **No** | If you want the request to return entries starting from 
 
 **Response:**
 
+Available statuses:
+* `Status 200`
+* `Status 422 if request validation failed`
+* `Status 400 if inner validation failed`
+* `Status 503 if service temporary unavailable`
+
 Empty response if order is not yours
 ```json5
 {
@@ -1700,14 +2429,14 @@ Empty response if order is not yours
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
-            "The limit may not be greater than 100."
+            "Limit field should be an integer."
         ],
         "offset": [
-            "The offset may not be greater than 100000."
+            "Offset field should be an integer."
         ]
     }
 }
@@ -1715,14 +2444,65 @@ Empty response if order is not yours
 
 ```json5
 {
-    "code": 0,
+  "code": 30,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field format is invalid."
+    ]
+  }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "market": [
+            "Market field should be a string."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
-            "The limit must be at least 1."
+            "Limit should not be greater than 100."
         ],
         "offset": [
-            "The offset must be at least 0."
+            "Offset should not be greater than 10000."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 30,
+    "message": "Validation failed",
+    "errors": {
+        "limit": [
+            "Limit should be at least 1."
+        ],
+        "offset": [
+            "Offset should be at least 0."
+        ]
+    }
+}
+```
+
+```json5
+{
+    "code": 1,
+    "message": "Inner validation failed",
+    "errors": {
+        "amount": [
+            "Invalid argument."
         ]
     }
 }
