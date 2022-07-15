@@ -9,7 +9,8 @@
 * [Fee](#fee)
 * [Server Time](#server-time)
 * [Server Status](#server-status)
-
+* [Collateral Markets](#collateral-markets-list)
+    
 Base URL is https://whitebit.com
 
 Endpoint example: https://whitebit.com/api/v4/public/{endpoint}
@@ -109,6 +110,8 @@ NONE
     "taker_fee": "0.1",                       // Taker fee in percentage
     "min_deposit": "0.0001",                  // Min deposit amount
     "max_deposit": "0",                       // Max deposit amount, will not be returned if there is no limit, 0 if unlimited
+    "currency_precision": 18,                // Max number of digits to the right of the decimal point
+    "is_memo": false,                           // Identifies if currency has memo address
   },
   "ETH": {
     "name": "Ethereum",
@@ -120,7 +123,9 @@ NONE
     "maker_fee": "0.1",
     "taker_fee": "0.1",
     "min_deposit": "0.1",
-    "max_deposit": "0"
+    "max_deposit": "0",
+    "currency_precision": 18,                
+    "is_memo": false,                         
   },
   "USDT": {
     "name": "Tether US",
@@ -133,6 +138,8 @@ NONE
     "taker_fee": "0.1",
     "min_deposit": "0",
     "max_deposit": "0",
+    "currency_precision": 6,
+    "is_memo": false,
     "networks": {                             // This object will be available in response if the currency is available on several networks
       "deposits": [                           // Networks available for depositing
         "ERC20",
@@ -179,7 +186,7 @@ ___
 ### Orderbook
 
 ```
-[GET] /api/v4/public/orderbook/{market}?depth=100&level=2
+[GET] /api/v4/public/orderbook/{market}?limit=100&level=2
 ```
 This endpoint retrieves the current order book as two arrays (bids / asks) with additional parameters.
 
@@ -190,7 +197,7 @@ _1 second_
 
 Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
-depth | int | **No** | Orders depth quantity:[0,5,10,20,50,100,500]. Not defined or 0 will return full order book
+limit | int | **No** | Orders depth quantity:[0,5,10,20,50,100,500]. Not defined or 0 will return full order book
 level | int | **No** | Optional parameter that allows API user to see different level of aggregation. Level 0 – default level, no aggregation. Starting from level 1 (lowest possible aggregation) and up to level 5 - different levels of aggregated orderbook.
 
 
@@ -360,3 +367,30 @@ _1 second_
 ]
 ```
 
+### Collateral Markets List
+
+```
+[GET] /api/v4/public/collateral/markets
+```
+This endpoint returns the list of markets that available for collateral trading
+
+**Response:**
+```json5
+[
+    "ADA_USDT",
+    "BCH_USDT",
+    "BTC_USDT",
+    "DOGE_USDT",
+    "EOS_USDT",
+    "ETH_BTC",
+    "ETH_USDT",
+    "LINK_USDT",
+    "LTC_USDT",
+    "SHIB_USDT",
+    "SOL_USDT",
+    "TRX_USDT",
+    "USDC_USDT",
+    "XLM_USDT",
+    "XRP_USDT"
+]
+```
