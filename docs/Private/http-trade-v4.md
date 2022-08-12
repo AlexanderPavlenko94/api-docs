@@ -180,8 +180,9 @@ Name | Type          | Mandatory | Description
 market | String        | **Yes** | Available market. Example: BTC_USDT
 side | String        | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'
 amount | String/Number | **Yes** | Amount of stock currency to buy or sell. Example: '0.001' or 0.001
-price | String/Number        | **Yes** | Price in money currency. Example: '9800' or 9800
+price | String/Number | **Yes** | Price in money currency. Example: '9800' or 9800
 clientOrderId | String        | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
+postOnly | boolean       | **No** | Orders are guaranteed to be the maker order when executed. Variables: 'true' / 'false' Example: 'false'.
 
 **Request BODY raw:**
 ```json5
@@ -190,6 +191,7 @@ clientOrderId | String        | **No** | Identifier should be unique and contain
     "side": "buy",
     "amount": "0.01",
     "price": "40000",
+    "postOnly": false,
     "clientOrderId": "order1987111",
     "request": "{{request}}",
     "nonce": "{{nonce}}"
@@ -299,6 +301,18 @@ Error codes:
             "Market is not available."
         ]
     }
+}
+```
+
+```json5
+{
+  "code": 31,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should not be empty string."
+    ]
+  }
 }
 ```
 
@@ -465,6 +479,18 @@ Error codes:
 }
 ```
 
+```json5
+{
+    "code": 13,
+    "message": "Inner validation failed",
+    "errors": {
+        "postOnly": [
+            "This order couldn't be executed as a maker order and was canceled."
+        ]
+    }
+}
+```
+
 </details>
 
 ___
@@ -593,6 +619,18 @@ Error codes:
             "Market is not available."
         ]
     }
+}
+```
+
+```json5
+{
+  "code": 31,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should not be empty string."
+    ]
+  }
 }
 ```
 
@@ -874,6 +912,18 @@ Error codes:
 
 ```json5
 {
+  "code": 31,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should not be empty string."
+    ]
+  }
+}
+```
+
+```json5
+{
     "code": 32,
     "message": "Validation failed",
     "errors": {
@@ -1145,6 +1195,18 @@ Error codes:
             "Market is not available."
         ]
     }
+}
+```
+
+```json5
+{
+  "code": 31,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should not be empty string."
+    ]
+  }
 }
 ```
 
@@ -1549,6 +1611,18 @@ Error codes:
             "Market is not available."
         ]
     }
+}
+```
+
+```json5
+{
+  "code": 31,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should not be empty string."
+    ]
+  }
 }
 ```
 
@@ -1994,7 +2068,7 @@ Available statuses:
 
 ```json5
 {
-  "code": 30,
+  "code": 31,
   "message": "Validation failed",
   "errors": {
     "market": [
@@ -2006,11 +2080,23 @@ Available statuses:
 
 ```json5
 {
-  "code": 30,
+  "code": 31,
   "message": "Validation failed",
   "errors": {
     "market": [
       "Market field format is invalid."
+    ]
+  }
+}
+```
+
+```json5
+{
+  "code": 31,
+  "message": "Validation failed",
+  "errors": {
+    "market": [
+      "Market field should not be empty string."
     ]
   }
 }
@@ -2165,7 +2251,7 @@ Available statuses:
 
 ```json5
 {
-  "code": 30,
+  "code": 31,
   "message": "Validation failed",
   "errors": {
     "market": [
@@ -2177,7 +2263,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 30,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
@@ -2468,7 +2554,7 @@ Empty response if order is not yours
 
 ```json5
 {
-  "code": 30,
+  "code": 31,
   "message": "Validation failed",
   "errors": {
     "market": [
@@ -2588,6 +2674,7 @@ side | String | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'. 
 amount | String | **Yes** | ⚠️Amount of **`stock`** currency to **buy** or **sell**.
 price | String | **Yes** | Price in money currency. Example: '9800'
 clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
+postOnly | boolean       | **No** | Orders are guaranteed to be the maker order when executed. Variables: 'true' / 'false' Example: 'false'.
 
 **Request BODY raw:**
 ```json5
@@ -2596,6 +2683,7 @@ clientOrderId | String | **No** | Identifier should be unique and contain letter
     "side": "buy",
     "amount": "0.01",
     "price": "40000",
+    "postOnly": false,
     "clientOrderId": "order1987111",
     "request": "{{request}}",
     "nonce": "{{nonce}}"
@@ -2630,12 +2718,12 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `31` - market is disabled for trading
+* `32` - incorrect amount (it is less than or equals zero or its precision is too big)
+* `33` - incorrect price (it is less than or equals zero or its precision is too big)
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `35` - incorrect maker fee (it is less than zero or its precision is too big)
+* `36` - incorrect clientOrderId (invalid string or not unique id)
 ___
 </details>
 
@@ -2710,12 +2798,12 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `31` - market is disabled for trading
+* `32` - incorrect amount (it is less than or equals zero or its precision is too big)
+* `33` - incorrect price (it is less than or equals zero or its precision is too big)
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `35` - incorrect maker fee (it is less than zero or its precision is too big)
+* `36` - incorrect clientOrderId (invalid string or not unique id)
 
 </details>
 
@@ -2792,12 +2880,12 @@ Available statuses:
 <summary><b>Errors:</b></summary>
 
 Error codes:
-* `1` - market is disabled for trading
-* `2` - incorrect amount (it is less than or equals zero or its precision is too big)
-* `3` - incorrect price (it is less than or equals zero or its precision is too big)
-* `4` - incorrect taker fee (it is less than zero or its precision is too big)
-* `5` - incorrect maker fee (it is less than zero or its precision is too big)
-* `6` - incorrect clientOrderId (invalid string or not unique id)
+* `31` - market is disabled for trading
+* `32` - incorrect amount (it is less than or equals zero or its precision is too big)
+* `33` - incorrect price (it is less than or equals zero or its precision is too big)
+* `34` - incorrect taker fee (it is less than zero or its precision is too big)
+* `35` - incorrect maker fee (it is less than zero or its precision is too big)
+* `36` - incorrect clientOrderId (invalid string or not unique id)
 </details>
 
 ---
