@@ -502,7 +502,7 @@ This endpoint returns the list of available futures markets.
       "high": "24295.1",
       "low": "23765.3",
       "product_type": "Perpetual",
-      "open_interest": "6",
+      "open_interest": "6000",
       "index_price": "24019.25",
       "index_name": "Bitcoin",
       "index_currency": "BTC",
