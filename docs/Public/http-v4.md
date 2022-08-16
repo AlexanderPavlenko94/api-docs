@@ -476,3 +476,39 @@ This endpoint returns the list of markets that available for collateral trading
     "XRP_USDT"
 ]
 ```
+
+### Available Futures Markets List
+
+```
+[GET] /api/v4/public/futures
+```
+This endpoint returns the list of available futures markets.
+
+**Response:**
+```json5
+{
+  "success": true,
+  "message": null,
+  "result": [
+    {
+      "ticker_id": "BTC_PERP",
+      "stock_currency": "BTC",
+      "money_currency": "USDT",
+      "last_price": "24005.5",
+      "stock_volume": "196965.591",
+      "money_volume": "4737879075.7817",
+      "bid": "24005.4",
+      "ask": "24005.6",
+      "high": "24295.1",
+      "low": "23765.3",
+      "product_type": "Perpetual",
+      "open_interest": "6",
+      "index_price": "24019.25",
+      "index_name": "Bitcoin",
+      "index_currency": "BTC",
+      "funding_rate": "0.000044889033693137",
+      "next_funding_rate_timestamp": "1660665600000"
+    }
+  ]
+}
+```
