@@ -3909,7 +3909,7 @@ Available statuses:
     "dealMoney": "0",                  // if order finished - amount in money currency that finished
     "dealStock": "0",                  // if order finished - amount in stock currency that finished
     "amount": "0.001",                 // amount
-    "takerFee": "0.001",               // maker fee ratio. If the number less than 0.0001 - it will be rounded to zero
+    "takerFee": "0.001",               // taker fee ratio. If the number less than 0.0001 - it will be rounded to zero
     "makerFee": "0.001",               // maker fee ratio. If the number less than 0.0001 - it will be rounded to zero
     "left": "0.001",                   // if order not finished - rest of amount that must be finished
     "dealFee": "0",                    // fee in money that you pay if order is finished
