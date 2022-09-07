@@ -3113,7 +3113,7 @@ Available statuses:
 ```json5
 [
   {
-    "id": 117703764513,
+    "id": 117703764513,                   // oco order id
     "stop_loss": {
       "orderId": 117703764514,            // unexecuted order ID              
       "clientOrderId": "",                // custom order id; "clientOrderId": "" - if not specified.
@@ -3327,7 +3327,7 @@ Available statuses:
 
 ```json5
 {
-  "id": 117703764513,
+  "id": 117703764513,                   // oco order id
   "stop_loss": {
     "orderId": 117703764514,            // unexecuted order ID              
     "clientOrderId": "",                // custom order id; "clientOrderId": "" - if not specified.
@@ -4298,7 +4298,7 @@ Cancel existing order
 Name | Type       | Mandatory | Description
 ------------ |------------| ------------ | ------------
 market | String     | **Yes** | Available market. Example: BTC_USDT
-orderId | String/Int | **Yes** | Order Id. Example: 4180284841 or "4180284841"
+orderId | String/Int | **Yes** | OCO order Id. Example: 4180284841 or "4180284841"
 
 **Request BODY raw:**
 ```json5
@@ -4321,8 +4321,8 @@ Available statuses:
 
 ```json5
 {
-  "id": 117703764513,
-  "stop_loss": {
+  "id": 117703764513,                   // oco order id
+  "stop_loss": {                        
     "orderId": 117703764514,            // unexecuted order ID              
     "clientOrderId": "",                // custom order id; "clientOrderId": "" - if not specified.
     "market": "BTC_USDT",               // currency market
