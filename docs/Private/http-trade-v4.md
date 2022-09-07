@@ -2674,7 +2674,7 @@ side | String | **Yes** | Order type. Variables: 'buy' / 'sell' Example: 'buy'. 
 amount | String | **Yes** | ⚠️Amount of **`stock`** currency to **buy** or **sell**.
 price | String | **Yes** | Price in money currency. Example: '9800'
 clientOrderId | String | **No** | Identifier should be unique and contain letters, dashes or numbers only. The identifier must be unique for the next 24 hours.
-postOnly | boolean       | **No** | Orders are guaranteed to be the maker order when executed. Variables: 'true' / 'false' Example: 'false'.
+postOnly | boolean       | **No** | Orders are guaranteed to be the maker order when executed. Variables: true / false Example: false.
 
 **Request BODY raw:**
 ```json5
@@ -3080,7 +3080,7 @@ Available statuses:
 ### Query unexecuted(active) OCO orders
 
 ```
-[POST] /api/v4/oco_orders
+[POST] /api/v4/oco-orders
 ```
 This endpoint retrieves unexecuted oco orders only.
 
@@ -4289,7 +4289,7 @@ ___
 ### Cancel Oco order
 
 ```
-[POST] /api/v4/order/oco_cancel
+[POST] /api/v4/order/oco-cancel
 ```
 Cancel existing order
 
