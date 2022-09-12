@@ -382,7 +382,7 @@ Error codes:
 
 ```json5
 {
-    "code": 0,
+    "code": 32,
     "message": "Validation failed",
     "errors": {
         "amount": [
@@ -2056,7 +2056,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
@@ -2106,7 +2106,7 @@ Available statuses:
 ```json5
 {
     "message": "Validation failed",
-    "code": 0,
+    "code": 31,
     "errors": {
         "market": [
             "Market is not available"
@@ -2117,7 +2117,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
@@ -2132,7 +2132,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
@@ -2147,7 +2147,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
@@ -3163,7 +3163,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 31,
     "message": "Validation failed",
     "errors": {
         "market": [
@@ -3213,7 +3213,7 @@ Available statuses:
 ```json5
 {
     "message": "Validation failed",
-    "code": 0,
+    "code": 31,
     "errors": {
         "market": [
             "Market is not available"
@@ -3224,7 +3224,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
@@ -3239,7 +3239,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
@@ -3254,7 +3254,7 @@ Available statuses:
 
 ```json5
 {
-    "code": 0,
+    "code": 30,
     "message": "Validation failed",
     "errors": {
         "limit": [
