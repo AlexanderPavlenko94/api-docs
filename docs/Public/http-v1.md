@@ -186,7 +186,7 @@ Name | Type | Mandatory | Description
 market | String | **Yes** | Available market. Example: BTC_USDT
 start | Timestamp | **No** | Start time in seconds, default value is current daytime - day. Cannot be greater or equal to End Time. Example: 1596848400
 end | Timestamp | **No** | End time in seconds, default value is current time. Cannot be smaller or equal to Start Time. Example: 1596927600
-interval | String | **NO** | Possible values - 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1M. In case whether sent interval in minutes, server will return candles for 1 day period by default. For days or weeks interval default period is month. Default period for month interval is one year. 
+interval | String | **NO** | Possible values - 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1M. In case whether sent interval in minutes, server will return candles for 1 day period by default. For days or weeks interval default period is month. Default period for month interval is one year. Default value is 1h. 
 limit | Integer | **NO** | Possible values from 1 to 1440. Default value is 1440
 
 **Response:**
